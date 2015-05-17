@@ -7,26 +7,33 @@ output:
 
 
 ## Loading and preprocessing the data
-```{r setoptions,echo=FALSE,results="hide"}
-Sys.setlocale("LC_ALL", "English")
-opts_chunk$set(echo=TRUE, results="asis")
-```
-```{r load_data}
+
+
+```r
 # adata - activity data
 adata <- read.csv("activity.csv", stringsAsFactors = FALSE)
 ```
 
 ## What is mean total number of steps taken per day?
-```{r mean_median_daily}
+
+```r
 # total number of steps per day, ignoring NAs
 adata_total <- tapply(adata$steps, adata$date, sum, na.rm=TRUE)
 # mean and median, ignoring NAs
 adata_mean <- mean(adata_total, na.rm=TRUE)
 adata_median <- median(adata_total, na.rm=TRUE)
 print(paste("Mean total number of steps per day:", adata_mean))
+```
+
+[1] "Mean total number of steps per day: 9354.22950819672"
+
+```r
 print(paste("Median total number of steps per day:", adata_median))
 ```
-```{r total_histogram,fig.width=10}
+
+[1] "Median total number of steps per day: 10395"
+
+```r
 # pretty-printing a histogram with the total number of steps per day
 hist(adata_total, breaks=50,
      xlab="Total number of steps per day",
@@ -36,9 +43,12 @@ abline(v=adata_mean, lwd=2, col="red", lty=1)
 abline(v=adata_median, lwd=2, col="green", lty=2)
 ```
 
+![plot of chunk total_histogram](figure/total_histogram-1.png) 
+
 
 ## What is the average daily activity pattern?
-```{r avg_daily_pattern,fig.width=10}
+
+```r
 avg_steps <- tapply(adata$steps, adata$interval, mean, na.rm=TRUE)
 plot(avg_steps, type="l",
      main="Number of steps averaged across all days",
@@ -50,12 +60,26 @@ text(120, 150, pos=4,
      col="red", cex=1.2)
 ```
 
+![plot of chunk avg_daily_pattern](figure/avg_daily_pattern-1.png) 
+
 ## Imputing missing values
-```{r imputing_missing_values}
+
+```r
 missing_data_stats <- lapply(lapply(adata, is.na), sum)
 # 2304 rows with NAs, all of them in $steps
 missing_data_stats
+```
 
+$steps
+[1] 2304
+
+$date
+[1] 0
+
+$interval
+[1] 0
+
+```r
 # replacing missing values with average steps for an interval:
 # first, constructing data frame with average steps by interval
 tmp <- data.frame(interval=names(avg_steps),
@@ -76,10 +100,18 @@ m_adata_mean <- mean(m_adata_total)
 m_adata_median <- median(m_adata_total)
 print(paste("Mean total number of steps per day, modelled:",
             m_adata_mean))
+```
+
+[1] "Mean total number of steps per day, modelled: 10766.1886792453"
+
+```r
 print(paste("Median total number of steps per day, modelled:",
             m_adata_median))
 ```
-```{r total_histogram_modelled,fig.width=10}
+
+[1] "Median total number of steps per day, modelled: 10766.1886792453"
+
+```r
 # pretty-printing a histogram with the total number of steps per day
 # on the dataset with missing values filled with average for an interval
 hist(m_adata_total, breaks=50,
@@ -90,9 +122,12 @@ abline(v=m_adata_mean, lwd=2, col="red", lty=1)
 abline(v=m_adata_median, lwd=2, col="green", lty=2)
 ```
 
+![plot of chunk total_histogram_modelled](figure/total_histogram_modelled-1.png) 
+
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r weekday}
+
+```r
 # defaulting a new column for factoring week days/ends
 m_adata$is_weekend <- FALSE
 # filling weekends with TRUEs
@@ -107,7 +142,8 @@ m_adata$is_weekend <- factor(m_adata$is_weekend,
 m_adata_weekdays <- aggregate(steps ~ interval + is_weekend,
                               data = m_adata, FUN="mean")
 ```
-```{r weekdays_difference_plot,fig.width=10}
+
+```r
 # plotting
 library(lattice)
 xyplot(steps ~ interval | is_weekend,
@@ -117,3 +153,5 @@ xyplot(steps ~ interval | is_weekend,
        ylab="Average number of steps",
        main="Difference in average pattern between weekdays and weekends")
 ```
+
+![plot of chunk weekdays_difference_plot](figure/weekdays_difference_plot-1.png) 
